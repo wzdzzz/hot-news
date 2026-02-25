@@ -1,0 +1,101 @@
+# Hot News Scraper 配置文件
+
+# 爬虫调度配置
+scrapers:
+  weibo:
+    enabled: true
+    interval: 3600
+    max_items: 50
+  baidu:
+    enabled: true
+    interval: 3600
+    max_items: 50
+  zhihu:
+    enabled: true
+    interval: 3600
+    max_items: 50
+  sina_news:
+    enabled: true
+    interval: 7200
+    max_items: 30
+  netease:
+    enabled: true
+    interval: 7200
+    max_items: 30
+  bbc:
+    enabled: true
+    interval: 7200
+    max_items: 30
+  cnn:
+    enabled: true
+    interval: 7200
+    max_items: 30
+  reuters:
+    enabled: true
+    interval: 7200
+    max_items: 30
+  juejin:
+    enabled: true
+    interval: 7200
+    max_items: 30
+  csdn:
+    enabled: true
+    interval: 7200
+    max_items: 30
+  github_trending:
+    enabled: true
+    interval: 14400
+    max_items: 25
+  hackernews:
+    enabled: true
+    interval: 7200
+    max_items: 30
+  douyin:
+    enabled: true
+    interval: 3600
+    max_items: 50
+  bilibili:
+    enabled: true
+    interval: 3600
+    max_items: 50
+  toutiao:
+    enabled: true
+    interval: 3600
+    max_items: 50
+  kr36:
+    enabled: true
+    interval: 7200
+    max_items: 30
+  huxiu:
+    enabled: true
+    interval: 7200
+    max_items: 30
+  sspai:
+    enabled: true
+    interval: 14400
+    max_items: 25
+
+# 反爬配置
+anti_detect:
+  min_delay: 2
+  max_delay: 8
+  rate_limit: 10
+
+# 代理配置
+proxy:
+  enabled: false
+  proxies: []
+  api_url: ""
+
+# 数据库配置
+database:
+  path: "./data/hot_news.db"
+  cleanup_days: 30
+
+# API 配置
+api:
+  host: "0.0.0.0"
+  port: 8111
+  cors_origins:
+    - "http://localhost:5173"
+    - "http://localhost:3000"

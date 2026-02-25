@@ -1,0 +1,25 @@
+# Web framework
+fastapi==0.115.0
+uvicorn[standard]==0.30.0
+
+# HTTP client
+httpx==0.27.0
+
+# HTML parsing
+beautifulsoup4==4.12.3
+# lxml removed - use html.parser (built-in) instead, avoids C library dependency on Windows
+
+# Database
+sqlalchemy==2.0.30
+
+# Scheduler
+apscheduler==3.10.4
+
+# Config
+pyyaml==6.0.1
+
+# CORS
+# (included in fastapi)
+
+# Utilities
+fake-useragent==1.5.1
