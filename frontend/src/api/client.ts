@@ -55,6 +55,8 @@ export const fetchHotTopics = (params: {
   keyword?: string;
   page?: number;
   page_size?: number;
+  start_date?: string;
+  end_date?: string;
 }) => client.get<ApiResponse<PageResult<HotTopic>>>("/hot", { params });
 
 export const fetchLatest = () =>
@@ -78,5 +80,11 @@ export const runScraper = (source: string) =>
 
 export const runAllScrapers = () =>
   client.post<ApiResponse<Record<string, ScraperStatus>>>("/scraper/run-all");
+
+export const updateScraperInterval = (source: string, interval: number) =>
+  client.post<ApiResponse<ScraperStatus>>("/scraper/interval", {
+    source,
+    interval,
+  });
 
 export default client;

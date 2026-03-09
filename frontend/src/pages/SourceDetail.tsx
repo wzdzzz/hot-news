@@ -8,6 +8,7 @@ import {
   Input,
   Space,
   Breadcrumb,
+  DatePicker,
 } from "antd";
 import {
   ArrowLeftOutlined,
@@ -17,22 +18,29 @@ import {
 import { useHotTopics } from "../hooks/useHotData";
 import { SOURCE_NAMES, CATEGORY_COLORS } from "../components/HotCard";
 import type { HotTopic } from "../api/client";
+import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 
 const { Title, Text } = Typography;
+const { RangePicker } = DatePicker;
 
 export default function SourceDetail() {
   const { source } = useParams<{ source: string }>();
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [keyword, setKeyword] = useState("");
-  const pageSize = 30;
+  const [pageSize, setPageSize] = useState(30);
+  const [dateRange, setDateRange] = useState<
+    [Dayjs | null, Dayjs | null] | null
+  >(null);
 
   const { items, total, loading } = useHotTopics({
     source,
     keyword: keyword || undefined,
     page,
     page_size: pageSize,
+    start_date: dateRange?.[0]?.format("YYYY-MM-DD") || undefined,
+    end_date: dateRange?.[1]?.format("YYYY-MM-DD") || undefined,
   });
 
   const columns = [
@@ -130,17 +138,28 @@ export default function SourceDetail() {
             </Tag>
           )}
         </Space>
-        <Input
-          placeholder="搜索..."
-          prefix={<SearchOutlined />}
-          allowClear
-          value={keyword}
-          onChange={(e) => {
-            setKeyword(e.target.value);
-            setPage(1);
-          }}
-          style={{ width: 240 }}
-        />
+        <Space>
+          <RangePicker
+            value={dateRange}
+            onChange={(dates) => {
+              setDateRange(dates);
+              setPage(1);
+            }}
+            allowClear
+            placeholder={["开始日期", "结束日期"]}
+          />
+          <Input
+            placeholder="搜索..."
+            prefix={<SearchOutlined />}
+            allowClear
+            value={keyword}
+            onChange={(e) => {
+              setKeyword(e.target.value);
+              setPage(1);
+            }}
+            style={{ width: 240 }}
+          />
+        </Space>
       </div>
 
       <Table
@@ -152,7 +171,16 @@ export default function SourceDetail() {
           current: page,
           pageSize,
           total,
-          onChange: setPage,
+          showSizeChanger: true,
+          pageSizeOptions: [10, 20, 30, 50, 100],
+          onChange: (p, size) => {
+            if (size !== pageSize) {
+              setPageSize(size);
+              setPage(1);
+            } else {
+              setPage(p);
+            }
+          },
           showTotal: (t) => `共 ${t} 条`,
         }}
         size="middle"

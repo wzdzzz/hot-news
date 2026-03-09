@@ -3,7 +3,7 @@ from datetime import datetime
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from core.config import get_config
+from core.config import get_config, update_scraper_interval
 from core.database import save_topics, cleanup_old_data
 
 logger = logging.getLogger(__name__)
@@ -91,6 +91,23 @@ class ScraperScheduler:
             scraper_status[name]["last_status"] = "error"
             scraper_status[name]["last_error"] = str(e)
             logger.error(f"[{name}] Failed: {e}")
+
+    def update_interval(self, name: str, interval: int):
+        """更新指定爬虫的执行间隔并重新调度"""
+        job_id = f"scraper_{name}"
+        job = self.scheduler.get_job(job_id)
+        if job is None:
+            raise KeyError(f"Job '{job_id}' not found in scheduler")
+
+        self.scheduler.reschedule_job(
+            job_id,
+            trigger="interval",
+            seconds=interval,
+            jitter=120,
+        )
+        scraper_status[name]["interval"] = interval
+        update_scraper_interval(name, interval)
+        logger.info(f"[{name}] Interval updated to {interval}s")
 
     async def run_scraper_now(self, name: str) -> dict:
         """手动立即执行指定爬虫"""

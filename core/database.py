@@ -67,8 +67,10 @@ def query_topics(
     keyword: str | None = None,
     page: int = 1,
     page_size: int = 20,
+    start_date: datetime | None = None,
+    end_date: datetime | None = None,
 ) -> tuple[list[dict], int]:
-    """查询热点数据，支持筛选和分页"""
+    """查询热点数据，支持筛选、日期范围和分页"""
     session = get_session()
     try:
         query = session.query(HotTopic)
@@ -79,6 +81,10 @@ def query_topics(
             query = query.filter(HotTopic.category == category)
         if keyword:
             query = query.filter(HotTopic.title.contains(keyword))
+        if start_date:
+            query = query.filter(HotTopic.fetched_at >= start_date)
+        if end_date:
+            query = query.filter(HotTopic.fetched_at <= end_date)
 
         total = query.count()
         items = (

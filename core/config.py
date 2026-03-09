@@ -39,6 +39,24 @@ def get_scraper_config(name: str) -> dict[str, Any]:
     return scrapers.get(name, {"enabled": False, "interval": 7200, "max_items": 30})
 
 
+def save_config(path: str | Path | None = None) -> None:
+    """将内存中的配置写回 config.yaml"""
+    config_path = Path(path) if path else DEFAULT_CONFIG_PATH
+    cfg = get_config()
+    with open(config_path, "w", encoding="utf-8") as f:
+        yaml.dump(cfg, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+
+
+def update_scraper_interval(name: str, interval: int) -> None:
+    """更新指定爬虫的执行间隔并持久化到 yaml"""
+    cfg = get_config()
+    scrapers = cfg.get("scrapers", {})
+    if name not in scrapers:
+        raise KeyError(f"Scraper '{name}' not found in config")
+    scrapers[name]["interval"] = interval
+    save_config()
+
+
 def get_database_path() -> str:
     """获取数据库文件路径（绝对路径）"""
     cfg = get_config()

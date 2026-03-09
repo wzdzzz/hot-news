@@ -1,9 +1,15 @@
 import asyncio
 
 from fastapi import APIRouter, Body
+from pydantic import BaseModel, Field
 
 from core.scheduler import scheduler, scraper_status
 from scrapers import SCRAPER_MAP
+
+
+class IntervalUpdate(BaseModel):
+    source: str
+    interval: int = Field(..., ge=60, le=86400)
 
 router = APIRouter(prefix="/api/scraper", tags=["爬虫管理"])
 
@@ -28,6 +34,21 @@ async def run_scraper(
 
     result = await scheduler.run_scraper_now(source)
     return success_response(result, message=f"Scraper {source} executed")
+
+
+@router.post("/interval")
+async def update_scraper_interval(body: IntervalUpdate):
+    """修改爬虫执行间隔（秒），范围 60~86400"""
+    if body.source not in scraper_status:
+        return {"code": 400, "data": None, "message": f"Unknown scraper: {body.source}"}
+    try:
+        scheduler.update_interval(body.source, body.interval)
+        return success_response(
+            scraper_status[body.source],
+            message=f"Interval of {body.source} updated to {body.interval}s",
+        )
+    except Exception as e:
+        return {"code": 500, "data": None, "message": str(e)}
 
 
 @router.post("/run-all")

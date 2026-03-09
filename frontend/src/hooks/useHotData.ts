@@ -39,6 +39,8 @@ export function useHotTopics(params: {
   keyword?: string;
   page?: number;
   page_size?: number;
+  start_date?: string;
+  end_date?: string;
 }) {
   const [items, setItems] = useState<HotTopic[]>([]);
   const [total, setTotal] = useState(0);
@@ -56,7 +58,7 @@ export function useHotTopics(params: {
     } finally {
       setLoading(false);
     }
-  }, [params.source, params.category, params.keyword, params.page, params.page_size]);
+  }, [params.source, params.category, params.keyword, params.page, params.page_size, params.start_date, params.end_date]);
 
   useEffect(() => {
     load();

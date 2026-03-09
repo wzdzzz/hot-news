@@ -8,16 +8,20 @@ import {
   Space,
   message,
   Popconfirm,
+  Popover,
+  InputNumber,
 } from "antd";
 import {
   PlayCircleOutlined,
   ReloadOutlined,
   ThunderboltOutlined,
+  EditOutlined,
 } from "@ant-design/icons";
 import {
   fetchScraperStatus,
   runScraper,
   runAllScrapers,
+  updateScraperInterval,
   type ScraperStatus,
 } from "../api/client";
 import { SOURCE_NAMES } from "../components/HotCard";
@@ -29,6 +33,10 @@ export default function Admin() {
   const [statusMap, setStatusMap] = useState<Record<string, ScraperStatus>>({});
   const [loading, setLoading] = useState(true);
   const [runningKeys, setRunningKeys] = useState<Set<string>>(new Set());
+  const [editingInterval, setEditingInterval] = useState<{
+    source: string;
+    value: number;
+  } | null>(null);
 
   const loadStatus = async () => {
     setLoading(true);
@@ -79,6 +87,18 @@ export default function Admin() {
     }
   };
 
+  const handleUpdateInterval = async () => {
+    if (!editingInterval) return;
+    try {
+      await updateScraperInterval(editingInterval.source, editingInterval.value);
+      message.success("执行间隔已更新");
+      setEditingInterval(null);
+      await loadStatus();
+    } catch {
+      message.error("更新间隔失败");
+    }
+  };
+
   const dataSource = Object.entries(statusMap).map(([key, status]) => ({
     key,
     source: key,
@@ -121,9 +141,51 @@ export default function Admin() {
       title: "执行间隔",
       dataIndex: "interval",
       key: "interval",
-      render: (val: number) => {
-        if (val >= 3600) return `${val / 3600}小时`;
-        return `${val / 60}分钟`;
+      render: (val: number, record: { source: string }) => {
+        const label = val >= 3600 ? `${val / 3600}小时` : `${val / 60}分钟`;
+        return (
+          <Space>
+            <span>{label}</span>
+            <Popover
+              title="修改执行间隔（秒）"
+              trigger="click"
+              open={editingInterval?.source === record.source}
+              onOpenChange={(open) => {
+                if (open) {
+                  setEditingInterval({ source: record.source, value: val });
+                } else {
+                  setEditingInterval(null);
+                }
+              }}
+              content={
+                <Space direction="vertical" size="small">
+                  <InputNumber
+                    min={60}
+                    max={86400}
+                    step={60}
+                    value={editingInterval?.source === record.source ? editingInterval.value : val}
+                    onChange={(v) =>
+                      v != null &&
+                      setEditingInterval({ source: record.source, value: v })
+                    }
+                    addonAfter="秒"
+                    style={{ width: 180 }}
+                  />
+                  <Space>
+                    <Button size="small" onClick={() => setEditingInterval(null)}>
+                      取消
+                    </Button>
+                    <Button size="small" type="primary" onClick={handleUpdateInterval}>
+                      确认
+                    </Button>
+                  </Space>
+                </Space>
+              }
+            >
+              <Button type="link" size="small" icon={<EditOutlined />} />
+            </Popover>
+          </Space>
+        );
       },
     },
     {

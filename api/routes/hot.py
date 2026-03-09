@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Query
 
 from core.database import (
@@ -29,14 +31,28 @@ async def get_hot_topics(
     keyword: str | None = Query(None, description="关键词搜索"),
     page: int = Query(1, ge=1, description="页码"),
     page_size: int = Query(20, ge=1, le=100, description="每页数量"),
+    start_date: str | None = Query(None, description="开始日期 ISO 格式"),
+    end_date: str | None = Query(None, description="结束日期 ISO 格式"),
 ):
-    """获取热点列表（支持筛选、搜索、分页）"""
+    """获取热点列表（支持筛选、搜索、日期范围、分页）"""
+    parsed_start = None
+    parsed_end = None
+    if start_date:
+        parsed_start = datetime.fromisoformat(start_date)
+    if end_date:
+        parsed_end = datetime.fromisoformat(end_date)
+        # 如果只传了日期（没有时间部分），自动补到当天 23:59:59
+        if parsed_end.hour == 0 and parsed_end.minute == 0 and parsed_end.second == 0:
+            parsed_end = parsed_end.replace(hour=23, minute=59, second=59)
+
     items, total = query_topics(
         source=source,
         category=category,
         keyword=keyword,
         page=page,
         page_size=page_size,
+        start_date=parsed_start,
+        end_date=parsed_end,
     )
     return success_response({
         "items": items,
