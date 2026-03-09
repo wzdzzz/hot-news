@@ -15,6 +15,73 @@ class BBCScraper(BaseScraper):
     category = "news"
     base_url = "https://www.bbc.com/news"
 
+    @staticmethod
+    async def fetch_article_content(url: str) -> dict:
+        """抓取 BBC 文章正文内容，返回 {title, content, author, published_time}"""
+        from core.anti_detect import get_headers
+
+        headers = get_headers(referer="https://www.bbc.com/news")
+        async with httpx.AsyncClient(
+            headers=headers, timeout=30, follow_redirects=True
+        ) as client:
+            resp = await client.get(url)
+            resp.raise_for_status()
+
+        soup = BeautifulSoup(resp.text, "html.parser")
+
+        # 提取标题
+        title = ""
+        h1 = soup.find("h1")
+        if h1:
+            title = h1.get_text(strip=True)
+
+        # 提取正文段落 - BBC 文章正文通常在 article 标签内的 p 标签
+        paragraphs: list[str] = []
+        article = soup.find("article")
+        if article:
+            for p in article.find_all("p"):
+                text = p.get_text(strip=True)
+                # 过滤掉太短的段落（通常是标签或注释）
+                if text and len(text) > 10:
+                    paragraphs.append(text)
+        else:
+            # 备用：查找主要内容区域
+            for selector in [
+                '[data-component="text-block"]',
+                ".ssrcss-uf6wea-RichTextComponentWrapper",
+                'div[class*="TextContainerWrapper"]',
+            ]:
+                blocks = soup.select(selector)
+                if blocks:
+                    for block in blocks:
+                        text = block.get_text(strip=True)
+                        if text and len(text) > 10:
+                            paragraphs.append(text)
+                    break
+
+        content = "\n\n".join(paragraphs)
+
+        # 提取作者
+        author = ""
+        author_tag = soup.select_one(
+            '[data-testid="byline"], .ssrcss-68pt20-Text-TextContributorName'
+        )
+        if author_tag:
+            author = author_tag.get_text(strip=True)
+
+        # 提取发布时间
+        published_time = ""
+        time_tag = soup.find("time")
+        if time_tag:
+            published_time = time_tag.get("datetime", "") or time_tag.get_text(strip=True)
+
+        return {
+            "title": title,
+            "content": content,
+            "author": author,
+            "published_time": published_time,
+        }
+
     async def fetch(self, client: httpx.AsyncClient) -> list[dict]:
         try:
             resp = await client.get(self.base_url)

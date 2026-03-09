@@ -9,15 +9,20 @@ import {
   Space,
   Breadcrumb,
   DatePicker,
+  Modal,
+  Spin,
+  message,
 } from "antd";
 import {
   ArrowLeftOutlined,
   SearchOutlined,
   LinkOutlined,
+  ReadOutlined,
 } from "@ant-design/icons";
 import { useHotTopics } from "../hooks/useHotData";
 import { SOURCE_NAMES, CATEGORY_COLORS } from "../components/HotCard";
-import type { HotTopic } from "../api/client";
+import type { HotTopic, ArticleContent } from "../api/client";
+import { fetchTopicContent } from "../api/client";
 import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 
@@ -33,6 +38,29 @@ export default function SourceDetail() {
   const [dateRange, setDateRange] = useState<
     [Dayjs | null, Dayjs | null] | null
   >(null);
+  const [articleModal, setArticleModal] = useState(false);
+  const [articleLoading, setArticleLoading] = useState(false);
+  const [articleData, setArticleData] = useState<ArticleContent | null>(null);
+
+  const handleViewContent = async (topicId: number) => {
+    setArticleModal(true);
+    setArticleLoading(true);
+    setArticleData(null);
+    try {
+      const res = await fetchTopicContent(topicId);
+      if (res.data.code === 200) {
+        setArticleData(res.data.data);
+      } else {
+        message.error(res.data.message || "获取正文失败");
+        setArticleModal(false);
+      }
+    } catch {
+      message.error("获取正文失败");
+      setArticleModal(false);
+    } finally {
+      setArticleLoading(false);
+    }
+  };
 
   const { items, total, loading } = useHotTopics({
     source,
@@ -65,14 +93,27 @@ export default function SourceDetail() {
       dataIndex: "title",
       key: "title",
       ellipsis: true,
-      render: (title: string, record: HotTopic) =>
-        record.url ? (
-          <a href={record.url} target="_blank" rel="noopener noreferrer">
-            {title} <LinkOutlined />
-          </a>
-        ) : (
-          title
-        ),
+      render: (title: string, record: HotTopic) => (
+        <Space>
+          {record.url ? (
+            <a href={record.url} target="_blank" rel="noopener noreferrer">
+              {title} <LinkOutlined />
+            </a>
+          ) : (
+            title
+          )}
+          {source === "bbc" && record.url && (
+            <Button
+              type="link"
+              size="small"
+              icon={<ReadOutlined />}
+              onClick={() => handleViewContent(record.id)}
+            >
+              正文
+            </Button>
+          )}
+        </Space>
+      ),
     },
     {
       title: "热度",
@@ -185,6 +226,38 @@ export default function SourceDetail() {
         }}
         size="middle"
       />
+
+      <Modal
+        title={articleData?.title || "文章正文"}
+        open={articleModal}
+        onCancel={() => setArticleModal(false)}
+        footer={null}
+        width={720}
+      >
+        {articleLoading ? (
+          <div style={{ textAlign: "center", padding: 40 }}>
+            <Spin tip="正在抓取文章内容..." />
+          </div>
+        ) : articleData ? (
+          <div>
+            {articleData.author && (
+              <Text type="secondary" style={{ display: "block", marginBottom: 8 }}>
+                作者：{articleData.author}
+              </Text>
+            )}
+            {articleData.published_time && (
+              <Text type="secondary" style={{ display: "block", marginBottom: 16 }}>
+                发布时间：{articleData.published_time}
+              </Text>
+            )}
+            <div style={{ lineHeight: 1.8, fontSize: 15 }}>
+              {articleData.content.split("\n\n").map((p, i) => (
+                <p key={i} style={{ marginBottom: 12 }}>{p}</p>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </Modal>
     </div>
   );
 }

@@ -7,6 +7,7 @@ from core.database import (
     get_topic_by_id,
     query_latest_by_source,
     query_topics,
+    update_topic_extra,
 )
 
 router = APIRouter(prefix="/api/hot", tags=["热点"])
@@ -89,3 +90,47 @@ async def get_topic_detail(topic_id: int):
     if topic is None:
         return {"code": 404, "data": None, "message": "Not found"}
     return success_response(topic)
+
+
+@router.get("/{topic_id}/content")
+async def get_topic_content(topic_id: int):
+    """抓取并返回文章正文（目前支持 BBC），结果缓存到 extra 字段"""
+    topic = get_topic_by_id(topic_id)
+    if topic is None:
+        return {"code": 404, "data": None, "message": "Not found"}
+
+    # 如果已经缓存过正文，直接返回
+    extra = topic.get("extra") or {}
+    if extra.get("content"):
+        return success_response({
+            "title": extra.get("article_title", topic["title"]),
+            "content": extra["content"],
+            "author": extra.get("author", ""),
+            "published_time": extra.get("published_time", ""),
+        })
+
+    # 检查来源是否支持正文抓取
+    url = topic.get("url", "")
+    source = topic.get("source", "")
+
+    if source != "bbc" or not url:
+        return {"code": 400, "data": None, "message": f"暂不支持 {source} 来源的正文抓取"}
+
+    try:
+        from scrapers.bbc import BBCScraper
+        result = await BBCScraper.fetch_article_content(url)
+
+        if not result.get("content"):
+            return {"code": 404, "data": None, "message": "未能解析到文章正文"}
+
+        # 缓存到 extra 字段
+        update_topic_extra(topic_id, {
+            "article_title": result["title"],
+            "content": result["content"],
+            "author": result["author"],
+            "published_time": result["published_time"],
+        })
+
+        return success_response(result)
+    except Exception as e:
+        return {"code": 500, "data": None, "message": f"抓取文章内容失败: {str(e)}"}

@@ -141,6 +141,27 @@ def get_topic_by_id(topic_id: int) -> dict | None:
         session.close()
 
 
+def update_topic_extra(topic_id: int, extra: dict) -> bool:
+    """更新热点的 extra 字段（用于缓存文章正文等）"""
+    session = get_session()
+    try:
+        topic = session.query(HotTopic).get(topic_id)
+        if topic is None:
+            return False
+        # 合并已有 extra 数据
+        current_extra = topic.extra or {}
+        current_extra.update(extra)
+        topic.extra = current_extra
+        session.commit()
+        return True
+    except Exception as e:
+        session.rollback()
+        logger.error(f"Failed to update extra for topic {topic_id}: {e}")
+        return False
+    finally:
+        session.close()
+
+
 def get_all_sources() -> list[dict]:
     """获取所有来源及其最后更新时间和条目数"""
     session = get_session()

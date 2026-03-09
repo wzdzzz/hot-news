@@ -71,6 +71,16 @@ export const fetchCategories = () =>
 export const fetchTopicDetail = (id: number) =>
   client.get<ApiResponse<HotTopic>>(`/hot/${id}`);
 
+export interface ArticleContent {
+  title: string;
+  content: string;
+  author: string;
+  published_time: string;
+}
+
+export const fetchTopicContent = (id: number) =>
+  client.get<ApiResponse<ArticleContent>>(`/hot/${id}/content`);
+
 // 爬虫管理
 export const fetchScraperStatus = () =>
   client.get<ApiResponse<Record<string, ScraperStatus>>>("/scraper/status");
