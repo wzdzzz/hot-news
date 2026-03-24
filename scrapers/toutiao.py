@@ -1,4 +1,5 @@
 """今日头条热榜爬虫"""
+from __future__ import annotations
 
 import logging
 

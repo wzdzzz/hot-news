@@ -1,4 +1,5 @@
 """BBC News 爬虫"""
+from __future__ import annotations
 
 import logging
 

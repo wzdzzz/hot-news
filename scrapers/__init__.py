@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from scrapers.weibo import WeiboScraper
 from scrapers.baidu import BaiduScraper
 from scrapers.zhihu import ZhihuScraper
