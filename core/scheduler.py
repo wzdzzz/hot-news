@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 from datetime import datetime
 
+from typing import Dict
+
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from core.config import get_config, update_scraper_interval
@@ -11,7 +13,7 @@ from core.database import save_topics, cleanup_old_data
 logger = logging.getLogger(__name__)
 
 # 爬虫运行状态记录
-scraper_status: dict[str, dict] = {}
+scraper_status: Dict[str, dict] = {}
 
 
 class ScraperScheduler:

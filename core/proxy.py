@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import random
+from typing import List, Optional
 
 import httpx
 
@@ -16,10 +17,10 @@ class ProxyManager:
     def __init__(self):
         cfg = get_config().get("proxy", {})
         self.enabled = cfg.get("enabled", False)
-        self.proxies: list[str] = cfg.get("proxies", [])
+        self.proxies: List[str] = cfg.get("proxies", [])
         self.api_url: str = cfg.get("api_url", "")
 
-    def get_proxy(self) -> str | None:
+    def get_proxy(self) -> Optional[str]:
         """获取一个可用代理，未启用则返回 None"""
         if not self.enabled:
             return None

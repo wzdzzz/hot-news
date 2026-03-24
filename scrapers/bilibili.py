@@ -1,5 +1,6 @@
 """B站热门视频爬虫"""
 from __future__ import annotations
+from typing import List
 
 import logging
 
@@ -15,7 +16,7 @@ class BilibiliScraper(BaseScraper):
     category = "social"
     base_url = "https://www.bilibili.com"
 
-    async def fetch(self, client: httpx.AsyncClient) -> list[dict]:
+    async def fetch(self, client: httpx.AsyncClient) -> List[dict]:
         api = "https://api.bilibili.com/x/web-interface/ranking/v2"
         params = {"rid": 0, "type": "all"}
         try:
@@ -26,7 +27,7 @@ class BilibiliScraper(BaseScraper):
             logger.error(f"[bilibili] Request failed: {e}")
             return []
 
-        results: list[dict] = []
+        results: List[dict] = []
         try:
             video_list = data.get("data", {}).get("list", [])
 

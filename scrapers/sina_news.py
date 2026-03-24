@@ -1,5 +1,6 @@
 """新浪新闻热榜爬虫"""
 from __future__ import annotations
+from typing import List
 
 import logging
 
@@ -15,7 +16,7 @@ class SinaNewsScraper(BaseScraper):
     category = "news"
     base_url = "https://newsapp.sina.cn"
 
-    async def fetch(self, client: httpx.AsyncClient) -> list[dict]:
+    async def fetch(self, client: httpx.AsyncClient) -> List[dict]:
         api = "https://newsapp.sina.cn/api/hotlist?newsId=HB-1-snhs%2FSD-1-snhs"
         try:
             resp = await client.get(api)
@@ -25,7 +26,7 @@ class SinaNewsScraper(BaseScraper):
             logger.error(f"[sina_news] Request failed: {e}")
             return []
 
-        results: list[dict] = []
+        results: List[dict] = []
         try:
             # 新浪热榜接口返回 data.hotList 或 data 直接为列表
             hot_list = data.get("data", {})

@@ -1,5 +1,6 @@
 """少数派热榜爬虫"""
 from __future__ import annotations
+from typing import List
 
 import logging
 
@@ -15,7 +16,7 @@ class SspaiScraper(BaseScraper):
     category = "media"
     base_url = "https://sspai.com"
 
-    async def fetch(self, client: httpx.AsyncClient) -> list[dict]:
+    async def fetch(self, client: httpx.AsyncClient) -> List[dict]:
         api = (
             "https://sspai.com/api/v1/article/index/page/get"
             "?limit=20&offset=0&created_at=0&sort=hot&include_total=false"
@@ -28,7 +29,7 @@ class SspaiScraper(BaseScraper):
             logger.error(f"[sspai] Request failed: {e}")
             return []
 
-        results: list[dict] = []
+        results: List[dict] = []
         try:
             articles = data.get("data", []) or []
             for idx, item in enumerate(articles, start=1):

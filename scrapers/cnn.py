@@ -1,5 +1,6 @@
 """CNN 新闻爬虫"""
 from __future__ import annotations
+from typing import List
 
 import logging
 
@@ -16,7 +17,7 @@ class CNNScraper(BaseScraper):
     category = "news"
     base_url = "https://edition.cnn.com"
 
-    async def fetch(self, client: httpx.AsyncClient) -> list[dict]:
+    async def fetch(self, client: httpx.AsyncClient) -> List[dict]:
         # Try lite.cnn.com first (simpler HTML, more reliable parsing)
         results = await self._fetch_lite(client)
         if results:
@@ -25,7 +26,7 @@ class CNNScraper(BaseScraper):
         # Fallback to main edition.cnn.com
         return await self._fetch_main(client)
 
-    async def _fetch_lite(self, client: httpx.AsyncClient) -> list[dict]:
+    async def _fetch_lite(self, client: httpx.AsyncClient) -> List[dict]:
         """Fetch from lite.cnn.com - cleaner HTML structure."""
         try:
             resp = await client.get("https://lite.cnn.com/")
@@ -35,10 +36,10 @@ class CNNScraper(BaseScraper):
             logger.warning(f"[cnn] lite.cnn.com request failed: {e}")
             return []
 
-        results: list[dict] = []
+        results: List[dict] = []
         try:
             soup = BeautifulSoup(html, "html.parser")
-            seen_titles: set[str] = set()
+            seen_titles: set = set()
 
             # lite.cnn.com has a simple list of <a> tags with headlines
             for a_tag in soup.select("ul li a, ol li a, a.container__link"):
@@ -71,7 +72,7 @@ class CNNScraper(BaseScraper):
 
         return results
 
-    async def _fetch_main(self, client: httpx.AsyncClient) -> list[dict]:
+    async def _fetch_main(self, client: httpx.AsyncClient) -> List[dict]:
         """Fetch from edition.cnn.com - full site with richer data."""
         try:
             resp = await client.get(self.base_url)
@@ -81,10 +82,10 @@ class CNNScraper(BaseScraper):
             logger.error(f"[cnn] edition.cnn.com request failed: {e}")
             return []
 
-        results: list[dict] = []
+        results: List[dict] = []
         try:
             soup = BeautifulSoup(html, "html.parser")
-            seen_titles: set[str] = set()
+            seen_titles: set = set()
 
             # CNN uses various container classes for headlines
             headline_selectors = (

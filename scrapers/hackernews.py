@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from typing import Dict, List, Optional
 
 import httpx
 
@@ -18,12 +19,12 @@ class HackerNewsScraper(BaseScraper):
     category = "tech"
     base_url = "https://news.ycombinator.com"
 
-    async def fetch(self, client: httpx.AsyncClient) -> list[dict]:
+    async def fetch(self, client: httpx.AsyncClient) -> List[dict]:
         # Step 1: Get top story IDs
         try:
             resp = await client.get(f"{HN_API_BASE}/topstories.json")
             resp.raise_for_status()
-            story_ids: list[int] = resp.json()
+            story_ids: List[int] = resp.json()
         except Exception as e:
             logger.error(f"[hackernews] Failed to fetch top stories: {e}")
             return []
@@ -36,7 +37,7 @@ class HackerNewsScraper(BaseScraper):
         story_ids = story_ids[: self.max_items]
 
         # Step 2: Fetch each story item concurrently
-        async def fetch_item(item_id: int) -> dict | None:
+        async def fetch_item(item_id: int) -> Optional[dict]:
             try:
                 r = await client.get(f"{HN_API_BASE}/item/{item_id}.json")
                 r.raise_for_status()
@@ -48,7 +49,7 @@ class HackerNewsScraper(BaseScraper):
         # Use semaphore to limit concurrent requests
         sem = asyncio.Semaphore(10)
 
-        async def fetch_with_sem(item_id: int) -> dict | None:
+        async def fetch_with_sem(item_id: int) -> Optional[dict]:
             async with sem:
                 return await fetch_item(item_id)
 
@@ -56,7 +57,7 @@ class HackerNewsScraper(BaseScraper):
         raw_items = await asyncio.gather(*tasks)
 
         # Step 3: Build results
-        results: list[dict] = []
+        results: List[dict] = []
         for rank, item_data in enumerate(raw_items, start=1):
             if item_data is None:
                 continue

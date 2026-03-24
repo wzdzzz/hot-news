@@ -1,5 +1,6 @@
 """网易新闻热榜爬虫"""
 from __future__ import annotations
+from typing import List
 
 import logging
 
@@ -15,7 +16,7 @@ class NeteaseScraper(BaseScraper):
     category = "news"
     base_url = "https://m.163.com"
 
-    async def fetch(self, client: httpx.AsyncClient) -> list[dict]:
+    async def fetch(self, client: httpx.AsyncClient) -> List[dict]:
         api = "https://m.163.com/fe/api/hot/news/flow"
         try:
             resp = await client.get(api)
@@ -25,7 +26,7 @@ class NeteaseScraper(BaseScraper):
             logger.error(f"[netease] Request failed: {e}")
             return []
 
-        results: list[dict] = []
+        results: List[dict] = []
         try:
             # 网易热榜接口返回 data.data 列表
             items = data.get("data", {})

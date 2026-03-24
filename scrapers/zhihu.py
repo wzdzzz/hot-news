@@ -1,5 +1,6 @@
 """知乎热榜爬虫"""
 from __future__ import annotations
+from typing import List
 
 import logging
 
@@ -15,7 +16,7 @@ class ZhihuScraper(BaseScraper):
     category = "social"
     base_url = "https://www.zhihu.com"
 
-    async def fetch(self, client: httpx.AsyncClient) -> list[dict]:
+    async def fetch(self, client: httpx.AsyncClient) -> List[dict]:
         api = "https://api.zhihu.com/topstory/hot-list"
         params = {"limit": self.max_items}
         try:
@@ -26,7 +27,7 @@ class ZhihuScraper(BaseScraper):
             logger.error(f"[zhihu] Request failed: {e}")
             return []
 
-        results: list[dict] = []
+        results: List[dict] = []
         try:
             items = data.get("data", [])
             for idx, item in enumerate(items, start=1):

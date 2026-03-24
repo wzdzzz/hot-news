@@ -1,5 +1,6 @@
 """36氪热榜爬虫"""
 from __future__ import annotations
+from typing import List
 
 import json
 import logging
@@ -16,7 +17,7 @@ class Kr36Scraper(BaseScraper):
     category = "media"
     base_url = "https://36kr.com"
 
-    async def fetch(self, client: httpx.AsyncClient) -> list[dict]:
+    async def fetch(self, client: httpx.AsyncClient) -> List[dict]:
         api = "https://gateway.36kr.com/api/mis/nav/home/nav/rank/hot"
         payload = {
             "partner_id": "wap",
@@ -34,7 +35,7 @@ class Kr36Scraper(BaseScraper):
             logger.error(f"[kr36] Request failed: {e}")
             return []
 
-        results: list[dict] = []
+        results: List[dict] = []
         try:
             inner = data.get("data", {})
             # API 有时返回 JSON 字符串，有时返回 dict

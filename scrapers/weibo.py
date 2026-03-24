@@ -1,5 +1,6 @@
 """微博热搜爬虫"""
 from __future__ import annotations
+from typing import List
 
 import logging
 
@@ -15,7 +16,7 @@ class WeiboScraper(BaseScraper):
     category = "social"
     base_url = "https://weibo.com"
 
-    async def fetch(self, client: httpx.AsyncClient) -> list[dict]:
+    async def fetch(self, client: httpx.AsyncClient) -> List[dict]:
         api = "https://weibo.com/ajax/side/hotSearch"
         try:
             resp = await client.get(api)
@@ -25,7 +26,7 @@ class WeiboScraper(BaseScraper):
             logger.error(f"[weibo] Request failed: {e}")
             return []
 
-        results: list[dict] = []
+        results: List[dict] = []
         try:
             realtime = data.get("data", {}).get("realtime", [])
             for idx, item in enumerate(realtime, start=1):

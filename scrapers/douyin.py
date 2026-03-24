@@ -1,5 +1,6 @@
 """抖音热榜爬虫"""
 from __future__ import annotations
+from typing import List
 
 import logging
 
@@ -15,7 +16,7 @@ class DouyinScraper(BaseScraper):
     category = "social"
     base_url = "https://www.douyin.com"
 
-    async def fetch(self, client: httpx.AsyncClient) -> list[dict]:
+    async def fetch(self, client: httpx.AsyncClient) -> List[dict]:
         api = "https://www.douyin.com/aweme/v1/web/hot/search/list/"
         try:
             resp = await client.get(api)
@@ -25,7 +26,7 @@ class DouyinScraper(BaseScraper):
             logger.error(f"[douyin] Request failed: {e}")
             return []
 
-        results: list[dict] = []
+        results: List[dict] = []
         try:
             word_list = data.get("data", {}).get("word_list", [])
 

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Dict, Type
+
 from scrapers.weibo import WeiboScraper
 from scrapers.baidu import BaiduScraper
 from scrapers.zhihu import ZhihuScraper
@@ -19,7 +21,7 @@ from scrapers.kr36 import Kr36Scraper
 from scrapers.huxiu import HuxiuScraper
 from scrapers.sspai import SspaiScraper
 
-SCRAPER_MAP: dict[str, type] = {
+SCRAPER_MAP: Dict[str, Type] = {
     "weibo": WeiboScraper,
     "baidu": BaiduScraper,
     "zhihu": ZhihuScraper,

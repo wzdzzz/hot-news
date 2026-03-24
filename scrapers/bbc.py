@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+from typing import List
 
 import httpx
 from bs4 import BeautifulSoup
@@ -37,7 +38,7 @@ class BBCScraper(BaseScraper):
             title = h1.get_text(strip=True)
 
         # 提取正文段落 - BBC 文章正文通常在 article 标签内的 p 标签
-        paragraphs: list[str] = []
+        paragraphs: List[str] = []
         article = soup.find("article")
         if article:
             for p in article.find_all("p"):
@@ -83,7 +84,7 @@ class BBCScraper(BaseScraper):
             "published_time": published_time,
         }
 
-    async def fetch(self, client: httpx.AsyncClient) -> list[dict]:
+    async def fetch(self, client: httpx.AsyncClient) -> List[dict]:
         try:
             resp = await client.get(self.base_url)
             resp.raise_for_status()
@@ -92,10 +93,10 @@ class BBCScraper(BaseScraper):
             logger.error(f"[bbc] Request failed: {e}")
             return []
 
-        results: list[dict] = []
+        results: List[dict] = []
         try:
             soup = BeautifulSoup(html, "html.parser")
-            seen_titles: set[str] = set()
+            seen_titles: set = set()
 
             # BBC uses data-testid attributes and <h2> tags for headlines
             headline_tags = soup.select(

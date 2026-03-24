@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, Optional, Union
 
 import yaml
 
@@ -13,7 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_CONFIG_PATH = BASE_DIR / "config.yaml"
 
 
-def load_config(path: str | Path | None = None) -> dict[str, Any]:
+def load_config(path: Optional[Union[str, Path]] = None) -> Dict[str, Any]:
     """加载 YAML 配置文件"""
     config_path = Path(path) if path else DEFAULT_CONFIG_PATH
     if not config_path.exists():
@@ -23,10 +23,10 @@ def load_config(path: str | Path | None = None) -> dict[str, Any]:
 
 
 # 全局配置单例
-_config: dict[str, Any] | None = None
+_config: Optional[Dict[str, Any]] = None
 
 
-def get_config() -> dict[str, Any]:
+def get_config() -> Dict[str, Any]:
     """获取全局配置（懒加载）"""
     global _config
     if _config is None:
@@ -34,14 +34,14 @@ def get_config() -> dict[str, Any]:
     return _config
 
 
-def get_scraper_config(name: str) -> dict[str, Any]:
+def get_scraper_config(name: str) -> Dict[str, Any]:
     """获取指定爬虫的配置"""
     cfg = get_config()
     scrapers = cfg.get("scrapers", {})
     return scrapers.get(name, {"enabled": False, "interval": 7200, "max_items": 30})
 
 
-def save_config(path: str | Path | None = None) -> None:
+def save_config(path: Optional[Union[str, Path]] = None) -> None:
     """将内存中的配置写回 config.yaml"""
     config_path = Path(path) if path else DEFAULT_CONFIG_PATH
     cfg = get_config()

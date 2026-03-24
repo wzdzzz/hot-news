@@ -1,5 +1,6 @@
 """虎嗅热榜爬虫"""
 from __future__ import annotations
+from typing import List
 
 import logging
 
@@ -15,7 +16,7 @@ class HuxiuScraper(BaseScraper):
     category = "media"
     base_url = "https://www.huxiu.com"
 
-    async def fetch(self, client: httpx.AsyncClient) -> list[dict]:
+    async def fetch(self, client: httpx.AsyncClient) -> List[dict]:
         api = "https://api-article.huxiu.com/web/article/articleList"
         payload = {
             "platform": "www",
@@ -34,7 +35,7 @@ class HuxiuScraper(BaseScraper):
             logger.error(f"[huxiu] Request failed: {e}")
             return []
 
-        results: list[dict] = []
+        results: List[dict] = []
         try:
             inner = data.get("data", {}) or {}
             articles = (

@@ -1,5 +1,6 @@
 """百度热搜爬虫"""
 from __future__ import annotations
+from typing import List
 
 import logging
 
@@ -16,7 +17,7 @@ class BaiduScraper(BaseScraper):
     category = "news"
     base_url = "https://top.baidu.com"
 
-    async def fetch(self, client: httpx.AsyncClient) -> list[dict]:
+    async def fetch(self, client: httpx.AsyncClient) -> List[dict]:
         url = "https://top.baidu.com/board?tab=realtime"
         try:
             resp = await client.get(url)
@@ -26,7 +27,7 @@ class BaiduScraper(BaseScraper):
             logger.error(f"[baidu] Request failed: {e}")
             return []
 
-        results: list[dict] = []
+        results: List[dict] = []
         try:
             soup = BeautifulSoup(html, "html.parser")
             cards = soup.select("div.category-wrap_iQLoo")

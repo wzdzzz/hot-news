@@ -1,5 +1,6 @@
 """今日头条热榜爬虫"""
 from __future__ import annotations
+from typing import List
 
 import logging
 
@@ -15,7 +16,7 @@ class ToutiaoScraper(BaseScraper):
     category = "news"
     base_url = "https://www.toutiao.com"
 
-    async def fetch(self, client: httpx.AsyncClient) -> list[dict]:
+    async def fetch(self, client: httpx.AsyncClient) -> List[dict]:
         api = "https://www.toutiao.com/hot-event/hot-board/"
         params = {"origin": "toutiao_pc"}
         try:
@@ -26,7 +27,7 @@ class ToutiaoScraper(BaseScraper):
             logger.error(f"[toutiao] Request failed: {e}")
             return []
 
-        results: list[dict] = []
+        results: List[dict] = []
         try:
             items = data.get("data", [])
 

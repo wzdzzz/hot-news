@@ -1,5 +1,6 @@
 """GitHub Trending 爬虫"""
 from __future__ import annotations
+from typing import List
 
 import logging
 
@@ -16,7 +17,7 @@ class GitHubTrendingScraper(BaseScraper):
     category = "tech"
     base_url = "https://github.com"
 
-    async def fetch(self, client: httpx.AsyncClient) -> list[dict]:
+    async def fetch(self, client: httpx.AsyncClient) -> List[dict]:
         url = "https://github.com/trending"
         try:
             resp = await client.get(url)
@@ -26,7 +27,7 @@ class GitHubTrendingScraper(BaseScraper):
             logger.error(f"[github_trending] Request failed: {e}")
             return []
 
-        results: list[dict] = []
+        results: List[dict] = []
         try:
             soup = BeautifulSoup(html, "html.parser")
             rows = soup.select("article.Box-row")

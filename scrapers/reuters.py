@@ -1,5 +1,6 @@
 """Reuters 新闻爬虫"""
 from __future__ import annotations
+from typing import List
 
 import logging
 
@@ -16,7 +17,7 @@ class ReutersScraper(BaseScraper):
     category = "news"
     base_url = "https://www.reuters.com"
 
-    async def fetch(self, client: httpx.AsyncClient) -> list[dict]:
+    async def fetch(self, client: httpx.AsyncClient) -> List[dict]:
         try:
             resp = await client.get(self.base_url)
             resp.raise_for_status()
@@ -25,10 +26,10 @@ class ReutersScraper(BaseScraper):
             logger.error(f"[reuters] Request failed: {e}")
             return []
 
-        results: list[dict] = []
+        results: List[dict] = []
         try:
             soup = BeautifulSoup(html, "html.parser")
-            seen_titles: set[str] = set()
+            seen_titles: set = set()
 
             # Reuters uses data-testid attributes for headlines
             headline_selectors = (

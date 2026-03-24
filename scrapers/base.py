@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
+from typing import List
 
 import httpx
 
@@ -20,7 +21,7 @@ class BaseScraper(ABC):
     max_items: int = 50     # 默认最大抓取条数
 
     @abstractmethod
-    async def fetch(self, client: httpx.AsyncClient) -> list[dict]:
+    async def fetch(self, client: httpx.AsyncClient) -> List[dict]:
         """
         子类实现具体的爬取逻辑。
 
@@ -39,7 +40,7 @@ class BaseScraper(ABC):
         """
         ...
 
-    async def run(self) -> list[dict]:
+    async def run(self) -> List[dict]:
         """执行爬取，包装反爬逻辑"""
         logger.info(f"[{self.source}] Starting scrape...")
 

@@ -1,5 +1,6 @@
 """掘金热榜爬虫"""
 from __future__ import annotations
+from typing import List
 
 import logging
 
@@ -15,7 +16,7 @@ class JuejinScraper(BaseScraper):
     category = "tech"
     base_url = "https://juejin.cn"
 
-    async def fetch(self, client: httpx.AsyncClient) -> list[dict]:
+    async def fetch(self, client: httpx.AsyncClient) -> List[dict]:
         api = "https://api.juejin.cn/content_api/v1/content/article_rank"
         params = {
             "category_id": "1",
@@ -30,7 +31,7 @@ class JuejinScraper(BaseScraper):
             logger.error(f"[juejin] Request failed: {e}")
             return []
 
-        results: list[dict] = []
+        results: List[dict] = []
         try:
             articles = data.get("data", []) or []
             for idx, item in enumerate(articles, start=1):

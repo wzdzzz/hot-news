@@ -1,5 +1,6 @@
 """CSDN热榜爬虫"""
 from __future__ import annotations
+from typing import List
 
 import logging
 
@@ -15,7 +16,7 @@ class CSDNScraper(BaseScraper):
     category = "tech"
     base_url = "https://blog.csdn.net"
 
-    async def fetch(self, client: httpx.AsyncClient) -> list[dict]:
+    async def fetch(self, client: httpx.AsyncClient) -> List[dict]:
         api = "https://blog.csdn.net/phoenix/web/blog/hot-rank?page=0&pageSize=25"
         try:
             resp = await client.get(api)
@@ -25,7 +26,7 @@ class CSDNScraper(BaseScraper):
             logger.error(f"[csdn] Request failed: {e}")
             return []
 
-        results: list[dict] = []
+        results: List[dict] = []
         try:
             articles = data.get("data", []) or []
             for idx, item in enumerate(articles, start=1):

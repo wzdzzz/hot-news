@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Tuple
 
 from sqlalchemy import create_engine, desc, func, select, delete
 from sqlalchemy.orm import Session, sessionmaker
@@ -33,7 +34,7 @@ def get_session() -> Session:
     return _SessionLocal()
 
 
-def save_topics(items: list[dict], source: str, category: str):
+def save_topics(items: List[dict], source: str, category: str):
     """批量保存热点数据到数据库"""
     session = get_session()
     now = datetime.utcnow()
@@ -64,14 +65,14 @@ def save_topics(items: list[dict], source: str, category: str):
 
 
 def query_topics(
-    source: str | None = None,
-    category: str | None = None,
-    keyword: str | None = None,
+    source: Optional[str] = None,
+    category: Optional[str] = None,
+    keyword: Optional[str] = None,
     page: int = 1,
     page_size: int = 20,
-    start_date: datetime | None = None,
-    end_date: datetime | None = None,
-) -> tuple[list[dict], int]:
+    start_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None,
+) -> Tuple[List[dict], int]:
     """查询热点数据，支持筛选、日期范围和分页"""
     session = get_session()
     try:
@@ -100,7 +101,7 @@ def query_topics(
         session.close()
 
 
-def query_latest_by_source() -> dict[str, list[dict]]:
+def query_latest_by_source() -> Dict[str, List[dict]]:
     """获取每个来源的最新一批热点"""
     session = get_session()
     try:
@@ -125,7 +126,7 @@ def query_latest_by_source() -> dict[str, list[dict]]:
             .all()
         )
 
-        result: dict[str, list[dict]] = {}
+        result: Dict[str, List[dict]] = {}
         for item in items:
             result.setdefault(item.source, []).append(item.to_dict())
         return result
@@ -133,7 +134,7 @@ def query_latest_by_source() -> dict[str, list[dict]]:
         session.close()
 
 
-def get_topic_by_id(topic_id: int) -> dict | None:
+def get_topic_by_id(topic_id: int) -> Optional[dict]:
     """根据 ID 获取单条热点"""
     session = get_session()
     try:
@@ -164,7 +165,7 @@ def update_topic_extra(topic_id: int, extra: dict) -> bool:
         session.close()
 
 
-def get_all_sources() -> list[dict]:
+def get_all_sources() -> List[dict]:
     """获取所有来源及其最后更新时间和条目数"""
     session = get_session()
     try:

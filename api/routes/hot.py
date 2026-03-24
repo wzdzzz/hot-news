@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Optional
 
 from fastapi import APIRouter, Query
 
@@ -29,13 +30,13 @@ def success_response(data, message="success"):
 
 @router.get("")
 async def get_hot_topics(
-    source: str | None = Query(None, description="来源筛选"),
-    category: str | None = Query(None, description="分类筛选"),
-    keyword: str | None = Query(None, description="关键词搜索"),
+    source: Optional[str] = Query(None, description="来源筛选"),
+    category: Optional[str] = Query(None, description="分类筛选"),
+    keyword: Optional[str] = Query(None, description="关键词搜索"),
     page: int = Query(1, ge=1, description="页码"),
     page_size: int = Query(20, ge=1, le=100, description="每页数量"),
-    start_date: str | None = Query(None, description="开始日期 ISO 格式"),
-    end_date: str | None = Query(None, description="结束日期 ISO 格式"),
+    start_date: Optional[str] = Query(None, description="开始日期 ISO 格式"),
+    end_date: Optional[str] = Query(None, description="结束日期 ISO 格式"),
 ):
     """获取热点列表（支持筛选、搜索、日期范围、分页）"""
     parsed_start = None

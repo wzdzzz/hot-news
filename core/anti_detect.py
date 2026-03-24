@@ -5,6 +5,7 @@ import random
 import time
 import logging
 from collections import defaultdict
+from typing import Dict
 
 from core.config import get_config
 
@@ -30,7 +31,7 @@ USER_AGENTS = [
 ]
 
 # 令牌桶 - 每个来源独立限速
-_token_buckets: dict[str, float] = defaultdict(lambda: time.time())
+_token_buckets: Dict[str, float] = defaultdict(lambda: time.time())
 
 
 def get_random_ua() -> str:
@@ -38,7 +39,7 @@ def get_random_ua() -> str:
     return random.choice(USER_AGENTS)
 
 
-def get_headers(referer: str = "") -> dict[str, str]:
+def get_headers(referer: str = "") -> Dict[str, str]:
     """生成完整的伪装请求头"""
     headers = {
         "User-Agent": get_random_ua(),
