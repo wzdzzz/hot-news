@@ -116,6 +116,7 @@ server {
 NGINXEOF
 
 ln -sf /etc/nginx/sites-available/hot-news /etc/nginx/sites-enabled/
+rm -f /etc/nginx/sites-enabled/default
 nginx -t
 echo "  -> Nginx 配置完成 (监听端口 7777)"
 
