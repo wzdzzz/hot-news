@@ -50,6 +50,7 @@ class HotTopic(Base):
             "summary": self.summary,
             "image_url": self.image_url,
             "extra": self.extra,
-            "fetched_at": self.fetched_at.isoformat() if self.fetched_at else None,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
+            # 时间以 UTC 存储，输出时带上 Z 标记，前端 dayjs 才能正确转为本地时间
+            "fetched_at": self.fetched_at.isoformat() + "Z" if self.fetched_at else None,
+            "created_at": self.created_at.isoformat() + "Z" if self.created_at else None,
         }

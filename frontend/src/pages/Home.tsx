@@ -12,13 +12,6 @@ import HotCard from "../components/HotCard";
 import { SOURCE_NAMES } from "../components/HotCard";
 import { useLatestHot } from "../hooks/useHotData";
 
-const CATEGORY_MAP: Record<string, string[]> = {
-  social: ["weibo", "zhihu", "douyin", "bilibili"],
-  news: ["baidu", "sina_news", "netease", "bbc", "cnn", "toutiao"],
-  tech: ["juejin", "csdn", "github_trending", "hackernews"],
-  media: ["kr36", "huxiu", "sspai"],
-};
-
 export default function Home() {
   const { data, loading } = useLatestHot();
   const [activeTab, setActiveTab] = useState("all");
@@ -38,8 +31,8 @@ export default function Home() {
     let sources = Object.keys(data);
 
     if (activeTab !== "all") {
-      const allowedSources = CATEGORY_MAP[activeTab] ?? [];
-      sources = sources.filter((s) => allowedSources.includes(s));
+      // 直接用数据里的 category 字段过滤，避免维护硬编码映射（曾漏掉 reuters）
+      sources = sources.filter((s) => data[s]?.[0]?.category === activeTab);
     }
 
     if (selectedSources.length > 0) {

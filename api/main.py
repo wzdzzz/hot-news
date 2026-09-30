@@ -1,5 +1,6 @@
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,7 +10,8 @@ from api.routes.scraper import router as scraper_router
 from core.config import get_config
 from core.scheduler import scheduler
 
-# 配置日志
+# 配置日志（logs/ 被 gitignore，全新部署时不存在，需先创建）
+Path("logs").mkdir(exist_ok=True)
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",

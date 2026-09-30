@@ -4,7 +4,7 @@ import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
 
-from sqlalchemy import create_engine, desc, func, select, delete
+from sqlalchemy import create_engine, desc, func
 from sqlalchemy.orm import Session, sessionmaker
 
 from core.config import get_config, get_database_path
@@ -138,7 +138,7 @@ def get_topic_by_id(topic_id: int) -> Optional[dict]:
     """根据 ID 获取单条热点"""
     session = get_session()
     try:
-        topic = session.query(HotTopic).get(topic_id)
+        topic = session.get(HotTopic, topic_id)
         return topic.to_dict() if topic else None
     finally:
         session.close()
@@ -148,13 +148,14 @@ def update_topic_extra(topic_id: int, extra: dict) -> bool:
     """更新热点的 extra 字段（用于缓存文章正文等）"""
     session = get_session()
     try:
-        topic = session.query(HotTopic).get(topic_id)
+        topic = session.get(HotTopic, topic_id)
         if topic is None:
             return False
-        # 合并已有 extra 数据
-        current_extra = topic.extra or {}
-        current_extra.update(extra)
-        topic.extra = current_extra
+        # 合并已有 extra 数据（必须新建 dict：原地修改后赋回同一对象，
+        # SQLAlchemy 的 JSON 列检测不到变更，不会生成 UPDATE）
+        merged = dict(topic.extra or {})
+        merged.update(extra)
+        topic.extra = merged
         session.commit()
         return True
     except Exception as e:
@@ -184,7 +185,7 @@ def get_all_sources() -> List[dict]:
                 "source": r.source,
                 "category": r.category,
                 "total_count": r.total_count,
-                "last_fetched": r.last_fetched.isoformat() if r.last_fetched else None,
+                "last_fetched": r.last_fetched.isoformat() + "Z" if r.last_fetched else None,
             }
             for r in results
         ]

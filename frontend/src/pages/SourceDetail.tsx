@@ -67,8 +67,9 @@ export default function SourceDetail() {
     keyword: keyword || undefined,
     page,
     page_size: pageSize,
-    start_date: dateRange?.[0]?.format("YYYY-MM-DD") || undefined,
-    end_date: dateRange?.[1]?.format("YYYY-MM-DD") || undefined,
+    // 转成 UTC ISO（带 Z），与后端按 UTC 存储的时间正确对齐
+    start_date: dateRange?.[0]?.startOf("day").toISOString() || undefined,
+    end_date: dateRange?.[1]?.endOf("day").toISOString() || undefined,
   });
 
   const columns = [

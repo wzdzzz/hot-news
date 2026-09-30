@@ -14,6 +14,7 @@ const SOURCE_NAMES: Record<string, string> = {
   netease: "网易新闻",
   bbc: "BBC News",
   cnn: "CNN",
+  reuters: "路透社",
   juejin: "掘金",
   csdn: "CSDN",
   github_trending: "GitHub Trending",

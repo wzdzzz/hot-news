@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   fetchHotTopics,
   fetchLatest,
@@ -45,18 +45,22 @@ export function useHotTopics(params: {
   const [items, setItems] = useState<HotTopic[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  // 请求序号，丢弃乱序返回的过期响应（快速输入关键词时会连发多个请求）
+  const seqRef = useRef(0);
 
   const load = useCallback(async () => {
+    const seq = ++seqRef.current;
     setLoading(true);
     try {
       const res = await fetchHotTopics(params);
+      if (seq !== seqRef.current) return;
       const result = res.data.data as PageResult<HotTopic>;
       setItems(result.items ?? []);
       setTotal(result.total ?? 0);
     } catch {
-      console.error("Failed to fetch hot topics");
+      if (seq === seqRef.current) console.error("Failed to fetch hot topics");
     } finally {
-      setLoading(false);
+      if (seq === seqRef.current) setLoading(false);
     }
   }, [params.source, params.category, params.keyword, params.page, params.page_size, params.start_date, params.end_date]);
 
