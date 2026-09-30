@@ -45,7 +45,8 @@ def get_headers(referer: str = "") -> Dict[str, str]:
         "User-Agent": get_random_ua(),
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
         "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8,en-US;q=0.7",
-        "Accept-Encoding": "gzip, deflate, br",
+        # 不手动声明 Accept-Encoding：若声明 br 而未安装 brotli 解码库，
+        # httpx 无法解压响应会报 utf-8 解码错误（bilibili 线上曾因此抓取失败）
         "Connection": "keep-alive",
         "Cache-Control": "max-age=0",
     }
